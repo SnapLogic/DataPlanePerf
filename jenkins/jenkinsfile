@@ -13,6 +13,7 @@ pipeline {
       ],
       description: 'Select FM size'
     )
+    string(name: 'Version', defaultValue: '', description: 'Provide build version')
     string(name: 'TestPlan', defaultValue: '', description: 'Provide jmx file')
     string(name: 'Threads', defaultValue: '', description: 'Number of Threads (users)')
     string(name: 'RampUpPeriod', defaultValue: '1', description: 'In seconds')
