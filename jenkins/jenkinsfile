@@ -67,10 +67,27 @@ pipeline {
         }
         dir('./perf') {
           sh """
+            rm -r perf/results/performance_results.jtl
             echo "Running performance tests"
             python3 jRunner.py -f "${params.TestPlan}" -t "${params.Threads}" ${params.envBaseurl} -r ${params.RampUpPeriod} -l ${params.LoopCount}
           """
         }
+      }
+    }
+
+    stage('Archive Results') {
+      agent { label "dpperf" }
+      steps {
+        // Archive the JMeter CSV results
+        archiveArtifacts artifacts: 'perf/results/performance_results.jtl', fingerprint: true
+      }
+    }
+
+    stage('Publish Performance Report') {
+      agent { label "dpperf" }
+      steps {
+        // Publish performance report using the Performance Plugin
+        perfReport parsers: [[$class: 'JMeterParser']], sourceDataFiles: 'perf/results/performance_results.jtl'
       }
     }
   }
