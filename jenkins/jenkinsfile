@@ -39,7 +39,7 @@ pipeline {
       agent { label "dpperf" }
       steps {
             dir('./perf') {
-                sh "python3 jRunner.py -f RTTChildToGrandChild.jmx -t 16 ${params.envBaseurl}"
+                sh "python3 jRunner.py -f RTTChildToGrandChild.jmx -t ${params.Threads} ${params.envBaseurl}"
       }
       }
     }
