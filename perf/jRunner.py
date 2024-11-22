@@ -25,7 +25,7 @@ def run_jmeter(jmx_file, threads, ramp_up, loop_count, report_file, base_url, jm
         "-Jloopcount={}".format(loop_count),  # Loop count
         "-JBASE_URL={}".format(base_url),     # Environment URL
         "-l", report_file                     # Output results file
-        "-f",                                  # Force to delete the results
+        "-f"                                  # Force to delete the results
     ]
 
     print("Running JMeter with the following command:")
