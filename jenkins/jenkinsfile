@@ -1,7 +1,3 @@
-def auto_repo = 'https://github.com/SnapLogic/Automation'
-
-// valid on can and stage. need to create accounts where deserved to be executed.
-
 pipeline {
   agent none // No global agent is defined; will be defined per stage
   options {
@@ -9,40 +5,83 @@ pipeline {
   }
 
   environment {
-      USER_KEY = credentials('userAdmin')
-      CP_ENV_VERSION = ''
-    }
+    USER_KEY = credentials('userAdmin')
+    CP_ENV_VERSION = ''  // Consider removing this if it's not used
+  }
 
   parameters {
-    choice(name: 'envBaseurl', choices: [ 'canv2-dpperf-cloudsnaplexmedium-fm.snaplogicdev.io',
-                                          'canv2-dpperf-groundsnaplexmedium-fm.snaplogicdev.io' ], description: 'Select FM size')
+    choice(
+      name: 'envBaseurl',
+      choices: [
+        'canv2-dpperf-cloudsnaplexmedium-fm.snaplogicdev.io',
+        'canv2-dpperf-groundsnaplexmedium-fm.snaplogicdev.io'
+      ],
+      description: 'Select FM size'
+    )
+    string(name: 'TestPlan', defaultValue: '', description: 'Provide jmx file')
     string(name: 'Threads', defaultValue: '', description: 'Number of Threads (users)')
-    string(name: 'Ramp-UP Period', defaultValue: '0', description: 'In seconds')
-    string(name: 'Loop Count', defaultValue: '1', description: '')
+    string(name: 'RampUpPeriod', defaultValue: '0', description: 'In seconds')
+    string(name: 'LoopCount', defaultValue: '1', description: 'Loop count for the test')
   }
 
   stages {
     stage('Initialization') {
       steps {
         script {
-            // Extract the 'pod' part from the URL
-            env.LABEL = "${params.envBaseurl}".tokenize('.')[1]
-            // Print the extracted label
-            echo "Extracted label from URL: ${env.LABEL}"
-            echo "Running on FM ${params.envBaseurl}"
+          // Extract the 'pod' part from the URL
+          env.LABEL = "${params.envBaseurl}".tokenize('.')[1]
+
+          // Print the extracted label and the URL
+          echo "Extracted label from URL: ${env.LABEL}"
+          echo "Running on FM ${params.envBaseurl}"
+
+          // Validate critical parameters
+          if (!params.TestPlan?.trim()) {
+            error "TestPlan is required."
+          }
+          if (!params.Threads?.isNumber() || params.Threads.toInteger() <= 0) {
+            error "Invalid Threads number. Please provide a positive integer."
+          }
         }
       }
     }
 
     stage('Run Performance Tests') {
-      // Dynamically assign the agent based on the extracted label
       agent { label "dpperf" }
       steps {
-            dir('./perf') {
-                sh "python3 jRunner.py -f RTTChildToGrandChild.jmx -t ${params.Threads} ${params.envBaseurl}"
-      }
+        script {
+          // Validate that the necessary parameters are provided
+          if (!params.TestPlan) {
+            error "TestPlan parameter is required to run the tests."
+          }
+          if (!params.Threads || !params.RampUpPeriod || !params.LoopCount) {
+            error "Threads, Ramp-Up Period, and Loop Count parameters must be provided."
+          }
+        }
+        dir('./perf') {
+          sh """
+            echo "Running performance test with parameters:"
+            echo "TestPlan: ${params.TestPlan}"
+            echo "Threads: ${params.Threads}"
+            echo "Ramp-Up Period: ${params.RampUpPeriod}"
+            echo "Loop Count: ${params.LoopCount}"
+
+            python3 jRunner.py -f "${params.TestPlan}" -t "${params.Threads}" ${params.envBaseurl} -r ${params.RampUpPeriod} -l ${params.LoopCount}
+          """
+        }
       }
     }
   }
-}
 
+  post {
+    always {
+      echo "TODO: Cleaning workspace, or slack notification"
+    }
+    success {
+      echo "Performance test completed successfully with no erros"
+    }
+    failure {
+      echo "Performance test has been failed."
+    }
+  }
+}
