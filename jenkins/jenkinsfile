@@ -14,13 +14,8 @@ pipeline {
     }
 
   parameters {
-    choice(name: 'envBaseurl', choices: [ 'https://cdn.canary.elastic.snaplogicdev.com/',
-                                          'https://cdn.stage.elastic.snaplogicdev.com/',
-                                          'https://cdn.uat.elastic.snaplogic.com/',
-                                          'https://cdn.kiwi.elastic.snaplogicdev.com/',
-                                          'https://cdn.hawk.elastic.snaplogicdev.com/',
-                                          'https://cdn.tahoe.elastic.snaplogicdev.com/',
-                                          'https://cdn.elastic.snaplogic.com/' ], description: 'Select pod URL.')
+    choice(name: 'envBaseurl', choices: [ 'canv2-dpperf-cloudsnaplexmedium-fm.snaplogicdev.io',
+                                          'canv2-dpperf-groundsnaplexmedium-fm.snaplogicdev.io' ], description: 'Select FM size')
   }
 
   stages {
@@ -41,7 +36,7 @@ pipeline {
       agent { label "dpperf" }
       steps {
             dir('./perf') {
-                sh "python3 jRunner.py -f RTTChildToGrandChild.jmx -t 16 canv2-dpperf-groundsnaplexmedium-fm.snaplogicdev.io"
+                sh "python3 jRunner.py -f RTTChildToGrandChild.jmx -t 16 ${params.envBaseurl}"
       }
       }
     }
