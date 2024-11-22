@@ -1,0 +1,50 @@
+def auto_repo = 'https://github.com/SnapLogic/Automation'
+
+// valid on can and stage. need to create accounts where deserved to be executed.
+
+pipeline {
+  agent none // No global agent is defined; will be defined per stage
+  options {
+    buildDiscarder(logRotator(daysToKeepStr: '10', numToKeepStr: '50'))
+  }
+
+  environment {
+      USER_KEY = credentials('userAdmin')
+      CP_ENV_VERSION = ''
+    }
+
+  parameters {
+    choice(name: 'envBaseurl', choices: [ 'https://cdn.canary.elastic.snaplogicdev.com/',
+                                          'https://cdn.stage.elastic.snaplogicdev.com/',
+                                          'https://cdn.uat.elastic.snaplogic.com/',
+                                          'https://cdn.kiwi.elastic.snaplogicdev.com/',
+                                          'https://cdn.hawk.elastic.snaplogicdev.com/',
+                                          'https://cdn.tahoe.elastic.snaplogicdev.com/',
+                                          'https://cdn.elastic.snaplogic.com/' ], description: 'Select pod URL.')
+  }
+
+  stages {
+    stage('Initialization') {
+      steps {
+        script {
+            echo "selectedTestrailPriority:${env.selectedTestrailPriority}"
+            // Extract the 'pod' part from the URL
+            env.LABEL = "${params.envBaseurl}".tokenize('.')[1]
+            // Print the extracted label
+            echo "Extracted label from URL: ${env.LABEL}"
+        }
+      }
+    }
+
+    stage('Run Performance Tests') {
+      // Dynamically assign the agent based on the extracted label
+      agent { label "dpperf" }
+      steps {
+        script {
+            echo "Running on label: ${env.LABEL}"
+        }
+      }
+    }
+  }
+}
+
