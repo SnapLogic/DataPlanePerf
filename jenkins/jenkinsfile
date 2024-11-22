@@ -16,17 +16,20 @@ pipeline {
   parameters {
     choice(name: 'envBaseurl', choices: [ 'canv2-dpperf-cloudsnaplexmedium-fm.snaplogicdev.io',
                                           'canv2-dpperf-groundsnaplexmedium-fm.snaplogicdev.io' ], description: 'Select FM size')
+    string(name: 'Threads', defaultValue: '', description: 'Number of Threads (users)')
+    string(name: 'Ramp-UP Period', defaultValue: '0', description: 'In seconds')
+    string(name: 'Loop Count', defaultValue: '1', description: '')
   }
 
   stages {
     stage('Initialization') {
       steps {
         script {
-            echo "selectedTestrailPriority:${env.selectedTestrailPriority}"
             // Extract the 'pod' part from the URL
             env.LABEL = "${params.envBaseurl}".tokenize('.')[1]
             // Print the extracted label
             echo "Extracted label from URL: ${env.LABEL}"
+            echo "Running on FM ${params.envBaseurl}"
         }
       }
     }
