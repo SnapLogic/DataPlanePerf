@@ -43,6 +43,7 @@ pipeline {
         script {
             echo "Running on label: ${env.LABEL}"
             def service1Response = sh(
+                script: "cd perf"
                 script: "jmeter -n -t RTTChildToGrandChild.jmx -JTHREADS=5 -JBASE_URL=canv2-dpperf-groundsnaplexmedium-fm.snaplogicdev.io",
                 returnStdout: true
             ).trim()
