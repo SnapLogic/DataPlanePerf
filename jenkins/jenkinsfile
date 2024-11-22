@@ -42,8 +42,10 @@ pipeline {
       steps {
         script {
             echo "Running on label: ${env.LABEL}"
-            ls -la
-            jmeter -n -t RTTChildToGrandChild.jmx -JTHREADS=5 -JBASE_URL=canv2-dpperf-groundsnaplexmedium-fm.snaplogicdev.io
+            def service1Response = sh(
+                script: "jmeter -n -t RTTChildToGrandChild.jmx -JTHREADS=5 -JBASE_URL=canv2-dpperf-groundsnaplexmedium-fm.snaplogicdev.io",
+                returnStdout: true
+            ).trim()
         }
       }
     }
