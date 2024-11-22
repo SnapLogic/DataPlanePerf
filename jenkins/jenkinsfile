@@ -41,7 +41,7 @@ pipeline {
       agent { label "dpperf" }
       steps {
             dir('./perf') {
-                sh "/opt/apache-jmeter/bin/jmeter.sh -n -t RTTChildToGrandChild.jmx -JTHREADS=5 -JBASE_URL=canv2-dpperf-groundsnaplexmedium-fm.snaplogicdev.io"
+                sh "python3 jrunner.py -f RTTChildToGrandChild.jmx -t 16 canv2-dpperf-groundsnaplexmedium-fm.snaplogicdev.io"
       }
       }
     }
