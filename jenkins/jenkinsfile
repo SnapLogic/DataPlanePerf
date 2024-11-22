@@ -4,11 +4,6 @@ pipeline {
     buildDiscarder(logRotator(daysToKeepStr: '10', numToKeepStr: '50'))
   }
 
-  environment {
-    USER_KEY = credentials('userAdmin')
-    CP_ENV_VERSION = ''  // Consider removing this if it's not used
-  }
-
   parameters {
     choice(
       name: 'envBaseurl',
@@ -22,6 +17,7 @@ pipeline {
     string(name: 'Threads', defaultValue: '', description: 'Number of Threads (users)')
     string(name: 'RampUpPeriod', defaultValue: '1', description: 'In seconds')
     string(name: 'LoopCount', defaultValue: '1', description: 'Loop count for the test')
+    booleanParam(name: 'Debug', defaultValue: false, description: 'Enable debug logging') // Debug flag added
   }
 
   stages {
@@ -31,9 +27,11 @@ pipeline {
           // Extract the 'pod' part from the URL
           env.LABEL = "${params.envBaseurl}".tokenize('.')[1]
 
-          // Print the extracted label and the URL
-          echo "Extracted label from URL: ${env.LABEL}"
-          echo "Running on FM ${params.envBaseurl}"
+          // Print the extracted label and the URL if debug mode is enabled
+          if (params.Debug) {
+            echo "Debug: Extracted label from URL: ${env.LABEL}"
+            echo "Debug: Running on FM ${params.envBaseurl}"
+          }
 
           // Validate critical parameters
           if (!params.TestPlan?.trim()) {
@@ -57,6 +55,15 @@ pipeline {
           if (!params.Threads || !params.RampUpPeriod || !params.LoopCount) {
             error "Threads, Ramp-Up Period, and Loop Count parameters must be provided."
           }
+
+          // Log debug information if debug is enabled
+          if (params.Debug) {
+            echo "Debug: Running performance test with parameters:"
+            echo "Debug: TestPlan: ${params.TestPlan}"
+            echo "Debug: Threads: ${params.Threads}"
+            echo "Debug: Ramp-Up Period: ${params.RampUpPeriod}"
+            echo "Debug: Loop Count: ${params.LoopCount}"
+          }
         }
         dir('./perf') {
           sh """
@@ -78,10 +85,10 @@ pipeline {
       echo "TODO: Cleaning workspace, or slack notification"
     }
     success {
-      echo "Performance test completed successfully with no erros"
+      echo "Performance test completed successfully with no errors."
     }
     failure {
-      echo "Performance test has been failed."
+      echo "Performance test has failed."
     }
   }
 }
