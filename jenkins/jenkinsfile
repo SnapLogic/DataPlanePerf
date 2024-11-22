@@ -67,7 +67,6 @@ pipeline {
         }
         dir('./perf') {
           sh """
-            rm -r perf/results/performance_results.jtl
             echo "Running performance tests"
             python3 jRunner.py -f "${params.TestPlan}" -t "${params.Threads}" ${params.envBaseurl} -r ${params.RampUpPeriod} -l ${params.LoopCount}
           """
