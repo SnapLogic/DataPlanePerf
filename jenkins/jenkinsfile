@@ -20,7 +20,7 @@ pipeline {
     )
     string(name: 'TestPlan', defaultValue: '', description: 'Provide jmx file')
     string(name: 'Threads', defaultValue: '', description: 'Number of Threads (users)')
-    string(name: 'RampUpPeriod', defaultValue: '0', description: 'In seconds')
+    string(name: 'RampUpPeriod', defaultValue: '1', description: 'In seconds')
     string(name: 'LoopCount', defaultValue: '1', description: 'Loop count for the test')
   }
 
