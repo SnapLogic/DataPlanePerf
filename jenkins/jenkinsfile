@@ -40,10 +40,9 @@ pipeline {
       // Dynamically assign the agent based on the extracted label
       agent { label "dpperf" }
       steps {
-            echo "Running on label: ${env.LABEL}"
-            sh "cd perf"
-            sh "pwd"
-            sh "jmeter -n -t RTTChildToGrandChild.jmx -JTHREADS=5 -JBASE_URL=canv2-dpperf-groundsnaplexmedium-fm.snaplogicdev.io"
+            dir('/perf') {
+                sh "jmeter -n -t RTTChildToGrandChild.jmx -JTHREADS=5 -JBASE_URL=canv2-dpperf-groundsnaplexmedium-fm.snaplogicdev.io"
+      }
       }
     }
   }
