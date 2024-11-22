@@ -21,7 +21,7 @@
         </elementProp>
       </ThreadGroup>
       <hashTree>
-        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="TriggerTask - Runtime Root to GrandChild Dynamic">
+        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="TriggerTask - Runtime Root to GrandChild Dynamic" enabled="true">
           <stringProp name="HTTPSampler.domain">${feedMasterIp}</stringProp>
           <stringProp name="HTTPSampler.protocol">https</stringProp>
           <stringProp name="HTTPSampler.path">/api/1/rest/feed/run/task/DpPerf/TriggeredTask/TriggeredTaskPerf/Performance2RunChildToGrandChildDynamicAcc</stringProp>
@@ -53,13 +53,13 @@
               </elementProp>
               <elementProp name="feedMasterIp" elementType="Argument">
                 <stringProp name="Argument.name">feedMasterIp</stringProp>
-                <stringProp name="Argument.value">canv2-dpperf-groundsnaplexmedium-fm.snaplogicdev.io</stringProp>
+                <stringProp name="Argument.value">${feedMasterIp}</stringProp>
                 <stringProp name="Argument.metadata">=</stringProp>
               </elementProp>
             </collectionProp>
           </Arguments>
           <hashTree/>
-          <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="Headers">
+          <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="Headers" enabled="true">
             <collectionProp name="HeaderManager.headers">
               <elementProp name="" elementType="Header">
                 <stringProp name="Header.name">Authorization</stringProp>
@@ -68,7 +68,7 @@
             </collectionProp>
           </HeaderManager>
           <hashTree/>
-          <ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="Response Assertion">
+          <ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="Response Assertion" enabled="true">
             <collectionProp name="Asserion.test_strings">
               <stringProp name="49586">200</stringProp>
             </collectionProp>
