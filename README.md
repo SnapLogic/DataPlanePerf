@@ -2,7 +2,7 @@ This repository contains the jmeter test scripts and configurations used by the 
 
 ### Prerequisites
 Before you can run the JMeter, make sure that you have following
-- Java 8+ t
+- Java 8+
 - Apache JMeter installed on your machine. You can download it from https://jmeter.apache.org/download_jmeter.cgi.
 - Python3 to run jmx files from commandline (enhanced command line expirience)
 
