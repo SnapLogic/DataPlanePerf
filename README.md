@@ -57,3 +57,6 @@ QA GitHub PR flow
 https://mysnaplogic.atlassian.net/wiki/spaces/QA/pages/3254747205/QA+GitHub+PR+flow
 
 if any questions, reach out either #data_plane_qa #dp-qa-alerts slack channel
+
+
+Jenkins http://172.27.181.216:8080/job/platform-jar/job/DataPlane/
