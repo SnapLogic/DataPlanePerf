@@ -2,9 +2,9 @@ pipeline {
     // update
     agent { label "dpperf" }
 
-    // Scheduled to run at 19:00 UTC every Saturday cron('0 19 * * 6')
+    // Scheduled to run at 19:00 UTC every Saturday
     triggers {
-        cron('*/10 * * * *')
+        cron('0 19 * * 6')
     }
 
     stages {
