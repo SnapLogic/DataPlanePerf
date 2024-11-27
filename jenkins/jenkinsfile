@@ -18,7 +18,7 @@ pipeline {
     string(name: 'Threads', defaultValue: '', description: 'Number of Threads (users)')
     string(name: 'RampUpPeriod', defaultValue: '1', description: 'In seconds')
     string(name: 'LoopCount', defaultValue: '1', description: 'Loop count for the test')
-    booleanParam(name: 'Debug', defaultValue: false, description: 'Enable debug logging') // Debug flag added
+    booleanParam(name: 'Debug', defaultValue: false, description: 'Enable debug logging')
   }
 
   stages {
