@@ -1,22 +1,22 @@
 pipeline {
-    // update
     agent { label "dpperf" }
-
     // Scheduled to run at 19:00 UTC every Saturday
     triggers {
-        cron('0 19 * * 6')
+        cron('0 19 * *6')
     }
-
     stages {
         stage('Trigger Downstream Job') {
             steps {
                 script {
                     def values = [10, 25, 50, 75, 120, 170, 220]
-
                     for (int i = 0; i < values.size(); i++) {
                         def currentValue = values[i]
-                        echo "Triggering downstream job - Run #${i + 1} with value=${currentValue}"
 
+                        // Calculate and print remaining values
+                        def remainingValues = values.drop(i + 1)
+                        echo "Remaining tests to run: ${remainingValues}"
+
+                        echo "Triggering downstream job - Run #${i + 1} with value=${currentValue}"
                         try {
                             // Trigger Downstream job
                             def result = build(
@@ -29,7 +29,6 @@ pipeline {
                                     string(name: 'Threads', value: currentValue.toString())
                                 ]
                             )
-
                             echo "Downstream job - Run #${i + 1} completed successfully with result: ${result.getResult()}."
                         } catch (Exception e) {
                             // Handle failure of the downstream job
@@ -37,7 +36,6 @@ pipeline {
                             // Set current build to unstable
                             currentBuild.result = 'UNSTABLE'
                         }
-
                         // Sleep for 5 minutes before the next trigger
                         if (i < values.size() - 1) {
                             echo "Chill time for 5 minutes before the next run"
@@ -48,12 +46,10 @@ pipeline {
             }
         }
     }
-
     post {
         always {
             echo "Downstream job trigger stage completed"
         }
-
         unstable {
             echo "Build is unstable due to downstream job failures"
         }
