@@ -1,6 +1,6 @@
 pipeline {
     // update
-    agent any
+    agent { label "dpperf" }
 
     // Scheduled to run at 19:00 UTC every Saturday cron('0 19 * * 6')
     triggers {
@@ -9,7 +9,6 @@ pipeline {
 
     stages {
         stage('Trigger Downstream Job') {
-            agent { label "dpperf" }
             steps {
                 script {
                     def values = [10, 25, 50, 75, 120, 170, 220]
