@@ -18,7 +18,7 @@ def search_jmx(jmx_file_name, root_dir='/'):
     return matching_file
 
 
-def run_jmeter(file_path, threads, ramp_up, loop_count, report_file, base_url, jmeter_path="jmeter"):
+def run_jmeter(file_path, threads, ramp_up, loop_count, report_file, base_url, jmeter_path="/opt/apache-jmeter/bin/jmeter.sh"):
     # Remove test report file if it already exists
     if os.path.exists(report_file):
         os.remove(report_file)
@@ -68,7 +68,7 @@ if __name__ == "__main__":
     parser.add_argument("-l", "--loopcount", type=int, default=1, help="Loop count (default: 1)")
     parser.add_argument("-o", "--output",
                         help="Path to the output results file (optional, defaults to a timestamped filename)")
-    parser.add_argument("-p", "--jmeterpath", default="jmeter", help="Path to the JMeter executable")
+    parser.add_argument("-p", "--jmeterpath", default="/opt/apache-jmeter/bin/jmeter.sh", help="Path to the JMeter executable")
 
     args = parser.parse_args()
 
