@@ -49,6 +49,7 @@ DataPlanePerf/
 ### Using the JMeter command line
 ```
 jmeter -n -t RTTChildToGrandChild.jmx -l results.csv -JTHREADS=16 -JBASE_URL=canv2-dpperf-groundsnaplexmedium-fm.snaplogicdev.io
+python3 jrunner.py -f RTTChildToGrandChild.jmx -t 16 canv2-dpperf-groundsnaplexmedium-fm.snaplogicdev.io
 ```
 
 
