@@ -9,6 +9,7 @@ pipeline {
 
     stages {
         stage('Trigger Downstream Job') {
+            agent { label "dpperf" }
             steps {
                 script {
                     def values = [10, 25, 50, 75, 120, 170, 220]
