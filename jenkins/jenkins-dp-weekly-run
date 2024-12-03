@@ -1,0 +1,98 @@
+pipeline {
+    agent { label "dpperf" }
+    // Scheduled to run at 19:00 UTC every Saturday
+    triggers {
+        cron('0 19 * * 6')
+    }
+    stages {
+        stage('Downstream Job for Scheduled Task') {
+            steps {
+                script {
+                    echo "WORK IN PROGRESS"
+                }
+            }
+        }
+        stage('Downstream Job for Ultra') {
+            steps {
+                script {
+                    // The cURL command to trigger the API
+                    def curlCommand0 = """
+                        curl -X GET "https://canary.elastic.snaplogicdev.com/api/1/rest/slsched/feed/DpPerf/UltraTask/shared/DP_UltraPerf_DeleteUltraTasks_Task" \\
+                             -H "Content-Type: application/json" \\
+                             -H "Authorization: Basic bmFzYmFidUBzbmFwbG9naWMuY29tOkNhbmFyeUAxMDEwMTA=" \\
+                    """
+
+                    // Debugging: Print the cURL command
+                    echo "Curl Command: ${curlCommand0}"
+                    echo "Deleting existing Ultra tasks created by previous run"
+
+                    // Execute the cURL command
+                    sh curlCommand0
+
+                    // The cURL command to trigger the API
+                    def curlCommand1 = """
+                        curl -X GET "https://canary.elastic.snaplogicdev.com/api/1/rest/slsched/feed/DpPerf/UltraTask/shared/DP_UltraPerf_Trigger_Task?release=${params.JCC_Version}&env=${params.url}" \\
+                             -H "Content-Type: application/json" \\
+                             -H "Authorization: Basic bmFzYmFidUBzbmFwbG9naWMuY29tOkNhbmFyeUAxMDEwMTA=" \\
+                    """
+
+                    // Debugging: Print the cURL command
+                    echo "Curl Command: ${curlCommand1}"
+                    echo "Running Ultra Performance Tests"
+
+                    // Execute the cURL command
+                    sh curlCommand1
+                    echo "Results can be viewed at https://lookerstudio.google.com/reporting/e6245e67-81d0-437f-842e-588c1c8a607d/page/HZ0UE"
+                }
+            }
+        }
+        stage('Downstream Job for Triggered Task') {
+            steps {
+                script {
+                    def values = [10, 25, 50, 75, 120, 170, 220]
+                    for (int i = 0; i < values.size(); i++) {
+                        def currentValue = values[i]
+
+                        // Calculate and print remaining values
+                        def remainingValues = values.drop(i + 1)
+                        echo "Remaining tests to run: ${remainingValues}"
+
+                        echo "Triggering downstream job - Run #${i + 1} with value=${currentValue}"
+                        try {
+                            // Trigger Downstream job
+                            def result = build(
+                                job: 'platform-jar/DataPlane/dp-performance/jmeter-runner',
+                                wait: true,
+                                parameters: [
+                                    string(name: 'envBaseurl', value: 'canv2-dpperf-groundsnaplexmedium-fm.snaplogicdev.io'),
+                                    string(name: 'Version', value: '4.39.1'),
+                                    string(name: 'TestPlan', value: 'RTTChildToGrandChild.jmx'),
+                                    string(name: 'Threads', value: currentValue.toString())
+                                ]
+                            )
+                            echo "Downstream job - Run #${i + 1} completed successfully with result: ${result.getResult()}."
+                        } catch (Exception e) {
+                            // Handle failure of the downstream job
+                            echo "Error: Downstream job - Run #${i + 1} failed with error: ${e.getMessage()}."
+                            // Set current build to unstable
+                            currentBuild.result = 'UNSTABLE'
+                        }
+                        // Sleep for 5 minutes before the next trigger
+                        if (i < values.size() - 1) {
+                            echo "Chill time for 5 minutes before the next run"
+                            sleep(time: 300, unit: 'SECONDS')
+                        }
+                    }
+                }
+            }
+        }
+    }
+    post {
+        always {
+            echo "Downstream job trigger stage completed"
+        }
+        unstable {
+            echo "Build is unstable due to downstream job failures"
+        }
+    }
+}
