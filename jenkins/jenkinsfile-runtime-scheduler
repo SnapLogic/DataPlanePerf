@@ -20,7 +20,7 @@ pipeline {
                         try {
                             // Trigger Downstream job
                             def result = build(
-                                job: 'platform-jar/DataPlane/DPPerformance/DPPerformanceRunner',
+                                job: 'platform-jar/DataPlane/dp-performance/jmeter-runner',
                                 wait: true,
                                 parameters: [
                                     string(name: 'envBaseurl', value: 'canv2-dpperf-groundsnaplexmedium-fm.snaplogicdev.io'),
