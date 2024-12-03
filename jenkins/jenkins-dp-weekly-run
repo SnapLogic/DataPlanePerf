@@ -91,10 +91,10 @@ pipeline {
     }
     post {
         always {
-            echo "Downstream job trigger stage completed"
+            echo "All Downstream stages completed"
         }
         unstable {
-            echo "Build is unstable due to downstream job failures"
+            echo "Build is unstable due to downstream stage failures"
         }
     }
 }

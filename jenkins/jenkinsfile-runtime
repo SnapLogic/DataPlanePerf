@@ -1,9 +1,5 @@
 pipeline {
     agent { label "dpperf" }
-    // Scheduled to run at 19:00 UTC every Saturday
-    triggers {
-        cron('0 19 * * 6')
-    }
     stages {
         stage('Trigger Downstream Job') {
             steps {
