@@ -12,7 +12,7 @@ pipeline {
                 }
             }
         }
-        stage('Downstream Job for Ultra') {
+        stage('Downstream Job for Ultra Task') {
             steps {
                 script {
                     // The cURL command to trigger the API
@@ -43,6 +43,8 @@ pipeline {
                     // Execute the cURL command
                     sh curlCommand1
                     echo "Results can be viewed at https://lookerstudio.google.com/reporting/e6245e67-81d0-437f-842e-588c1c8a607d/page/HZ0UE"
+                    echo "Waiting for 5 minutes to get snaplexes cooled down"
+                    sleep 300 // seconds
                 }
             }
         }
