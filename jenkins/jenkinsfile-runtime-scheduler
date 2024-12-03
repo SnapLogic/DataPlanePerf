@@ -5,7 +5,21 @@ pipeline {
         cron('0 19 * * 6')
     }
     stages {
-        stage('Trigger Downstream Job') {
+        stage('Downstream Job for Scheduled Task') {
+            steps {
+                script {
+                    echo "WORK IN PROGRESS"
+                }
+            }
+        }
+        stage('Downstream Job for Ultra') {
+            steps {
+                script {
+                    echo "WORK IN PROGRESS"
+                }
+            }
+        }
+        stage('Downstream Job for Triggered Task') {
             steps {
                 script {
                     def values = [10, 25, 50, 75, 120, 170, 220]
