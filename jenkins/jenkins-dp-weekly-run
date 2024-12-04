@@ -4,13 +4,17 @@ pipeline {
     triggers {
         cron('0 19 * * 6')
     }
+  parameters {
+    // for now hardcoded, need to add the url
+    string(name: 'Version', defaultValue: '4.39.1', description: 'Provide Snaplex build version')
+    }
     stages {
         stage('Downstream Job for Scheduled Task') {
             steps {
                 script {
                 // The cURL command to trigger the API
                     def curlCommand2 = """
-                        curl -X POST "https://canv2-dpperf-dpperfrunner-fm.snaplogicdev.io/api/1/rest/feed/run/task/DpPerf/ScheduledTask/ScheduledTaskPerf/ScheduledTrigger?NumOfTasks=20&Release=4.39" \\
+                        curl -X POST "https://canv2-dpperf-dpperfrunner-fm.snaplogicdev.io/api/1/rest/feed/run/task/DpPerf/ScheduledTask/ScheduledTaskPerf/ScheduledTrigger?NumOfTasks=500&Release=${params.Version}" \\
                              -H "Content-Type: application/json" \\
                              -H "Authorization: Bearer dpqa" \\
                     """
@@ -43,7 +47,7 @@ pipeline {
 
                     // The cURL command to trigger the API
                     def curlCommand1 = """
-                        curl -X GET "https://canary.elastic.snaplogicdev.com/api/1/rest/slsched/feed/DpPerf/UltraTask/shared/DP_UltraPerf_Trigger_Task?release=${params.JCC_Version}&env=${params.url}" \\
+                        curl -X GET "https://canary.elastic.snaplogicdev.com/api/1/rest/slsched/feed/DpPerf/UltraTask/shared/DP_UltraPerf_Trigger_Task?release=${params.Version}&env=https://cdn.canary.elastic.snaplogicdev.com" \\
                              -H "Content-Type: application/json" \\
                              -H "Authorization: Bearer dpqa" \\
                     """
