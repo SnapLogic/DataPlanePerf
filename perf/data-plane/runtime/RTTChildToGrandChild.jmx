@@ -215,7 +215,7 @@
                 </elementProp>
                 <elementProp name="influxdbToken" elementType="Argument">
                   <stringProp name="Argument.name">influxdbToken</stringProp>
-                  <stringProp name="Argument.value">Cg2A5XqAM8ddXKmRp9uRCx3y439pE97MjZmJsmrgicaIKXF7wUpxLfRrqIph5bSBdJfq9KVYK2KnuwukgUSeyQ==</stringProp>
+                  <stringProp name="Argument.value">AOB5M6odcwjb18tdgcyNFdcgNPQxfKxNLdz3nG9k_Ww5RY65yVLxtsrs5EM3K-sOFPen25vTZ-U48gwmCY3ZRA==</stringProp>
                   <stringProp name="Argument.metadata">=</stringProp>
                 </elementProp>
                 <elementProp name="influxdbOrg" elementType="Argument">
@@ -225,7 +225,7 @@
                 </elementProp>
                 <elementProp name="influxdbBucket" elementType="Argument">
                   <stringProp name="Argument.name">influxdbBucket</stringProp>
-                  <stringProp name="Argument.value">jmeter</stringProp>
+                  <stringProp name="Argument.value">slj</stringProp>
                   <stringProp name="Argument.metadata">=</stringProp>
                 </elementProp>
               </collectionProp>
