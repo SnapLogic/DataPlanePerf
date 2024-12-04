@@ -21,7 +21,7 @@
         </elementProp>
       </ThreadGroup>
       <hashTree>
-        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="TriggerTask - Runtime Root to GrandChild" enabled="true">
+        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="TriggerTask - Runtime Root to GrandChild">
           <stringProp name="HTTPSampler.domain">${feedMasterIp}</stringProp>
           <stringProp name="HTTPSampler.protocol">https</stringProp>
           <stringProp name="HTTPSampler.path">/api/1/rest/feed/run/task/DpPerf/TriggeredTask/TriggeredTaskPerf/PerformanceRunChildToGrandChild</stringProp>
@@ -175,7 +175,7 @@
                 </elementProp>
                 <elementProp name="graphiteHost" elementType="Argument">
                   <stringProp name="Argument.name">graphiteHost</stringProp>
-                  <stringProp name="Argument.value">127.0.0.1</stringProp>
+                  <stringProp name="Argument.value">localhost</stringProp>
                   <stringProp name="Argument.metadata">=</stringProp>
                 </elementProp>
                 <elementProp name="graphitePort" elementType="Argument">
