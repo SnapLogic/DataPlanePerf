@@ -62,4 +62,6 @@ if any questions, reach out either #data_plane_qa #dp-qa-alerts slack channel
 
 
 Jenkins http://172.27.181.216:8080/job/platform-jar/job/DataPlane/
+
 Grafana JMeter Monitoring http://172.27.187.1:3000/d/b4kP_KoMzasadasdasd/jmeter-load-test-realtime-stats
+![](img/grafana-1.png)
