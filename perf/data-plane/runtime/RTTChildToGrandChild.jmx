@@ -200,7 +200,7 @@
                 </elementProp>
                 <elementProp name="influxDBBucket" elementType="Argument">
                   <stringProp name="Argument.name">influxDBBucket</stringProp>
-                  <stringProp name="Argument.value">jmeter</stringProp>
+                  <stringProp name="Argument.value">slj</stringProp>
                   <stringProp name="Argument.metadata">=</stringProp>
                 </elementProp>
                 <elementProp name="influxDBFlushInterval" elementType="Argument">
