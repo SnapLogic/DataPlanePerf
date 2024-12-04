@@ -8,7 +8,19 @@ pipeline {
         stage('Downstream Job for Scheduled Task') {
             steps {
                 script {
-                    echo "WORK IN PROGRESS"
+                // The cURL command to trigger the API
+                    def curlCommand2 = """
+                        curl -X POST "https://canv2-dpperf-dpperfrunner-fm.snaplogicdev.io/api/1/rest/feed/run/task/DpPerf/ScheduledTask/ScheduledTaskPerf/ScheduledTrigger?NumOfTasks=20&Release=4.39" \\
+                             -H "Content-Type: application/json" \\
+                             -H "Authorization: Bearer dpqa" \\
+                    """
+
+                    // Debugging: Print the cURL command
+                    echo "Curl Command: ${curlCommand2}"
+
+                    // Execute the cURL command
+                    sh curlCommand2
+                    sleep 300 // seconds
                 }
             }
         }
@@ -19,7 +31,7 @@ pipeline {
                     def curlCommand0 = """
                         curl -X GET "https://canary.elastic.snaplogicdev.com/api/1/rest/slsched/feed/DpPerf/UltraTask/shared/DP_UltraPerf_DeleteUltraTasks_Task" \\
                              -H "Content-Type: application/json" \\
-                             -H "Authorization: Basic bmFzYmFidUBzbmFwbG9naWMuY29tOkNhbmFyeUAxMDEwMTA=" \\
+                             -H "Authorization: Bearer dpqa" \\
                     """
 
                     // Debugging: Print the cURL command
@@ -33,7 +45,7 @@ pipeline {
                     def curlCommand1 = """
                         curl -X GET "https://canary.elastic.snaplogicdev.com/api/1/rest/slsched/feed/DpPerf/UltraTask/shared/DP_UltraPerf_Trigger_Task?release=${params.JCC_Version}&env=${params.url}" \\
                              -H "Content-Type: application/json" \\
-                             -H "Authorization: Basic bmFzYmFidUBzbmFwbG9naWMuY29tOkNhbmFyeUAxMDEwMTA=" \\
+                             -H "Authorization: Bearer dpqa" \\
                     """
 
                     // Debugging: Print the cURL command
