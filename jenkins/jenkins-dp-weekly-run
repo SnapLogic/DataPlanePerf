@@ -1,14 +1,56 @@
 pipeline {
     agent { label "dpperf" }
+
     // Scheduled to run at 19:00 UTC every Saturday
     triggers {
         cron('0 19 * * 6')
     }
+
+    parameters {
+        string(name: 'envBaseurl', defaultValue: 'https://cdn.canary.elastic.snaplogicdev.com', description: 'Select environment')
+    }
+
+    environment {
+        Version = ""
+    }
+
     stages {
+        stage('Initialization') {
+            steps {
+                script {
+                    // Request to obtain version, consider to remove hardcoded creds
+                    def service2Response = sh(
+                        script: """
+                        curl -s "${params.envBaseurl}/api/1/rest/public/snaplex/DpPerf?plex_path=/DpPerf/shared/CloudSnaplexMedium" \
+                        --header 'Authorization: Basic YXNhbXNvbm92K3BlcmZhZG1pbjFAc25hcGxvZ2ljLmNvbTpyb21uZWItSGV4dG9rLW15dGJ5Ng=='
+                        """,
+                        returnStdout: true
+                    ).trim()
+
+                    // Parse JSON response
+                    def jsonParser = new groovy.json.JsonSlurper()
+                    def jsonData = jsonParser.parseText(service2Response)
+
+                    // Extract pkg_version
+                    Version = jsonData.response_map["/DpPerf/shared/CloudSnaplexMedium"].plex_info.pkg_version
+
+                    echo "pkg_version: ${Version}"
+                }
+            }
+        }
+
         stage('Downstream Job for Scheduled Task') {
             steps {
                 script {
-                    echo "WORK IN PROGRESS"
+                    echo "DP Version: ${Version}"
+                    def curlCommand2 = """
+                        curl -X POST "https://canv2-dpperf-dpperfrunner-fm.snaplogicdev.io/api/1/rest/feed/run/task/DpPerf/ScheduledTask/ScheduledTaskPerf/ScheduledTrigger?NumOfTasks=500&Release=${Version}" \
+                             -H "Content-Type: application/json" \
+                             -H "Authorization: Bearer dpqa"
+                    """
+                    echo "Curl Command: ${curlCommand2}"
+                    sh(script: curlCommand2)
+                    sleep 300 // Wait 5 minutes
                 }
             }
         }
@@ -19,7 +61,7 @@ pipeline {
                     def curlCommand0 = """
                         curl -X GET "https://canary.elastic.snaplogicdev.com/api/1/rest/slsched/feed/DpPerf/UltraTask/shared/DP_UltraPerf_DeleteUltraTasks_Task" \\
                              -H "Content-Type: application/json" \\
-                             -H "Authorization: Basic bmFzYmFidUBzbmFwbG9naWMuY29tOkNhbmFyeUAxMDEwMTA=" \\
+                             -H "Authorization: Bearer dpqa" \\
                     """
 
                     // Debugging: Print the cURL command
@@ -31,9 +73,9 @@ pipeline {
 
                     // The cURL command to trigger the API
                     def curlCommand1 = """
-                        curl -X GET "https://canary.elastic.snaplogicdev.com/api/1/rest/slsched/feed/DpPerf/UltraTask/shared/DP_UltraPerf_Trigger_Task?release=${params.JCC_Version}&env=${params.url}" \\
+                        curl -X GET "https://canary.elastic.snaplogicdev.com/api/1/rest/slsched/feed/DpPerf/UltraTask/shared/DP_UltraPerf_Trigger_Task?release=${params.Version}&env=https://cdn.canary.elastic.snaplogicdev.com" \\
                              -H "Content-Type: application/json" \\
-                             -H "Authorization: Basic bmFzYmFidUBzbmFwbG9naWMuY29tOkNhbmFyeUAxMDEwMTA=" \\
+                             -H "Authorization: Bearer dpqa" \\
                     """
 
                     // Debugging: Print the cURL command
@@ -89,9 +131,10 @@ pipeline {
             }
         }
     }
+
     post {
         always {
-            echo "All Downstream stages completed"
+            echo "All downstream stages completed"
         }
         unstable {
             echo "Build is unstable due to downstream stage failures"
