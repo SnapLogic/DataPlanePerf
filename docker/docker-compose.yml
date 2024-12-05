@@ -10,6 +10,7 @@ services:
       - "9090:9090"
     networks:
       - monitoring
+    restart: unless-stopped
 
   grafana:
     image: grafana/grafana:latest
@@ -23,6 +24,7 @@ services:
       - "3000:3000"
     networks:
       - monitoring
+    restart: unless-stopped
 
   alertmanager:
     image: prom/alertmanager:latest
@@ -33,6 +35,7 @@ services:
       - "9093:9093"
     networks:
       - monitoring
+    restart: unless-stopped
 
   influxdb:
     image: influxdb:latest
@@ -47,6 +50,7 @@ services:
       - influxdb-data:/var/lib/influxdb
     networks:
       - monitoring
+    restart: unless-stopped
 
 volumes:
   grafana-data:

@@ -1,0 +1,38 @@
+global:
+  scrape_interval:     10s # Set the scrape interval to every 10 seconds. Default is every 1 minute.
+# Here it's Prometheus itself.
+scrape_configs:
+  # Use file_sd_configs to watch for file
+  - job_name: 'metrics-engine'
+    metrics_path: 'prometheus'
+    scrape_interval: 10s
+    scheme: https
+    file_sd_configs:
+      - files:
+        - ./targets.json
+        refresh_interval: 1m
+    tls_config:
+      insecure_skip_verify: true
+
+  # change IP in "targets" to host ip where alertmanager is running
+  - job_name: "alertmanager"
+    static_configs:
+      - targets: ['172.27.184.201:9093']
+
+  - job_name: "prometheus"
+    # change IP in "targets" to host ip where prometheus is running
+    # metrics_path defaults to '/metrics'
+    # scheme defaults to 'http'
+    static_configs:
+      - targets: ['172.27.184.201:9090']
+    # change IP in "targets" to host ip where grafana is running
+  - job_name: "grafana"
+    metrics_path: 'metrics'
+    scrape_interval: 10s
+    scheme: http
+    static_configs:
+      - targets: ['172.27.184.201:3000']
+  # change IP in "targets" to host ip where influxDB is running
+  - job_name: "influxdb"
+    static_configs:
+      - targets: ["172.27.184.201:8086"]
