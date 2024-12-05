@@ -32,7 +32,7 @@ pipeline {
                     def jsonData = jsonParser.parseText(service2Response)
 
                     // Extract pkg_version
-                    Version = jsonData.response_map["/DpPerf/shared/CloudSnaplexMedium"].plex_info.pkg_version
+                    Version = jsonData.response_map["/DpPerf/shared/CloudSnaplexMedium"].plex_info.version
 
                     echo "pkg_version: ${Version}"
                 }
