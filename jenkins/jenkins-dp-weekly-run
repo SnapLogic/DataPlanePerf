@@ -1,30 +1,56 @@
 pipeline {
     agent { label "dpperf" }
+
     // Scheduled to run at 19:00 UTC every Saturday
     triggers {
         cron('0 19 * * 6')
     }
-  parameters {
-    // for now hardcoded, need to add the url
-    string(name: 'Version', defaultValue: '4.39.1', description: 'Provide Snaplex build version')
+
+    parameters {
+        string(name: 'envBaseurl', defaultValue: 'https://cdn.canary.elastic.snaplogicdev.com', description: 'Select environment')
     }
+
+    environment {
+        Version = ""
+    }
+
     stages {
+        stage('Initialization') {
+            steps {
+                script {
+                    // Request to obtain version, consider to remove hardcoded creds
+                    def service2Response = sh(
+                        script: """
+                        curl -s "${params.envBaseurl}/api/1/rest/public/snaplex/DpPerf?plex_path=/DpPerf/shared/CloudSnaplexMedium" \
+                        --header 'Authorization: Basic YXNhbXNvbm92K3BlcmZhZG1pbjFAc25hcGxvZ2ljLmNvbTpyb21uZWItSGV4dG9rLW15dGJ5Ng=='
+                        """,
+                        returnStdout: true
+                    ).trim()
+
+                    // Parse JSON response
+                    def jsonParser = new groovy.json.JsonSlurper()
+                    def jsonData = jsonParser.parseText(service2Response)
+
+                    // Extract pkg_version
+                    Version = jsonData.response_map["/DpPerf/shared/CloudSnaplexMedium"].plex_info.pkg_version
+
+                    echo "pkg_version: ${Version}"
+                }
+            }
+        }
+
         stage('Downstream Job for Scheduled Task') {
             steps {
                 script {
-                // The cURL command to trigger the API
+                    echo "DP Version: ${Version}"
                     def curlCommand2 = """
-                        curl -X POST "https://canv2-dpperf-dpperfrunner-fm.snaplogicdev.io/api/1/rest/feed/run/task/DpPerf/ScheduledTask/ScheduledTaskPerf/ScheduledTrigger?NumOfTasks=500&Release=${params.Version}" \\
-                             -H "Content-Type: application/json" \\
-                             -H "Authorization: Bearer dpqa" \\
+                        curl -X POST "https://canv2-dpperf-dpperfrunner-fm.snaplogicdev.io/api/1/rest/feed/run/task/DpPerf/ScheduledTask/ScheduledTaskPerf/ScheduledTrigger?NumOfTasks=500&Release=${Version}" \
+                             -H "Content-Type: application/json" \
+                             -H "Authorization: Bearer dpqa"
                     """
-
-                    // Debugging: Print the cURL command
                     echo "Curl Command: ${curlCommand2}"
-
-                    // Execute the cURL command
-                    sh curlCommand2
-                    sleep 300 // seconds
+                    sh(script: curlCommand2)
+                    sleep 300 // Wait 5 minutes
                 }
             }
         }
@@ -105,9 +131,10 @@ pipeline {
             }
         }
     }
+
     post {
         always {
-            echo "All Downstream stages completed"
+            echo "All downstream stages completed"
         }
         unstable {
             echo "Build is unstable due to downstream stage failures"
