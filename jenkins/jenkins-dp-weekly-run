@@ -12,6 +12,7 @@ pipeline {
 
     environment {
         Version = ""
+        USER_KEY = credentials('userAdmin')
     }
 
     stages {
@@ -22,7 +23,7 @@ pipeline {
                     def service2Response = sh(
                         script: """
                         curl -s "${params.envBaseurl}/api/1/rest/public/snaplex/DpPerf?plex_path=/DpPerf/shared/CloudSnaplexMedium" \
-                        --header 'Authorization: Basic YXNhbXNvbm92K3BlcmZhZG1pbjFAc25hcGxvZ2ljLmNvbTpyb21uZWItSGV4dG9rLW15dGJ5Ng=='
+                        --header 'Authorization: Basic ${env.USER_KEY}'
                         """,
                         returnStdout: true
                     ).trim()
@@ -32,7 +33,7 @@ pipeline {
                     def jsonData = jsonParser.parseText(service2Response)
 
                     // Extract pkg_version
-                    Version = jsonData.response_map["/DpPerf/shared/CloudSnaplexMedium"].plex_info.version
+                    Version = jsonData.response_map["/DpPerf/shared/CloudSnaplexMedium"].cc_info.running.version[0]
 
                     echo "pkg_version: ${Version}"
                 }
