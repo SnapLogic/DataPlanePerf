@@ -54,7 +54,7 @@ pipeline {
                         {
                             "attachments": [
                                 {
-                                    "fallback": "Data Plane weekly performance tests have started.",
+                                    "fallback": "Weekly Data Plane performance tests have started.",
                                     "color": "${color}",
                                     "text": "Data Plane weekly performance tests have started - <${env.BUILD_URL}|Jenkins job.>\n • Test Pod: canary\n • Data Plane version: ${Version}"
                                 }
