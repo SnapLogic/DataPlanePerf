@@ -56,7 +56,7 @@ pipeline {
                                 {
                                     "fallback": "Data Plane weekly performance tests have started.",
                                     "color": "${color}",
-                                    "text": "Data Plane weekly performance tests have started - <${env.BUILD_URL}|Jenkins job.>\n - Pod: canary\n - DP version: ${Version}"
+                                    "text": "Data Plane weekly performance tests have started - <${env.BUILD_URL}|Jenkins job.>\n • Test Pod: canary\n • Data Plane version: ${Version}"
                                 }
                             ],
                             "channel": "${slackChannel}",
