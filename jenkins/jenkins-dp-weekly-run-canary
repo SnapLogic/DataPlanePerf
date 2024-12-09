@@ -11,6 +11,7 @@ pipeline {
     }
 
     environment {
+        W_KEY = credentials('slackWebHook')
         Version = ""
         USER_KEY = credentials('userAdmin')
     }
@@ -39,7 +40,40 @@ pipeline {
                 }
             }
         }
+        stage('Send Slack Notification') {
+            steps {
+                script {
+                    // Build Slack Notification Message
+                    def slackChannel = "#dp-qa-alerts"
+                    def slackUsername = "Jenkins"
+                    def slackIcon = ":jenkins:"
+                    def color = "#36a64f"
+                    def slackWebHook = ''
 
+                    def slackMessage = """
+                        {
+                            "attachments": [
+                                {
+                                    "fallback": "Data Plane weekly performance tests have started.",
+                                    "color": "${color}",
+                                    "text": "Data Plane weekly performance tests have started - <${env.BUILD_URL}|Jenkins job.>\n - Pod: canary\n - DP version: ${Version}"
+                                }
+                            ],
+                            "channel": "${slackChannel}",
+                            "username": "${slackUsername}",
+                            "icon_emoji": "${slackIcon}"
+                        }
+                    """
+
+                    // Send Slack Notification via curl
+                    sh """
+                        curl -X POST -H 'Content-type: application/json' \
+                        --data '${slackMessage}' \
+                        '${env.W_KEY}'
+                    """
+                }
+            }
+        }
         stage('Downstream Job for Scheduled Task') {
             steps {
                 script {
