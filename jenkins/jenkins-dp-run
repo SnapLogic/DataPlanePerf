@@ -1,26 +1,25 @@
 pipeline {
     agent { label "dpperf" }
 
-    // Scheduled to run at 19:00 UTC every Saturday
-    triggers {
-        cron('0 19 * * 6')
-    }
-
     parameters {
-        string(name: 'envBaseurl', defaultValue: 'https://cdn.canary.elastic.snaplogicdev.com', description: 'Select environment')
+        choice(name: 'envBaseurl', choices: ['https://cdn.canary.elastic.snaplogicdev.com', 'https://stage.elastic.snaplogicdev.com'], description: 'Select environment')
     }
 
     environment {
         W_KEY = credentials('slackWebHook')
-        Version = ""
         USER_KEY = credentials('userAdmin')
+        Version = ""
+        slackChannel = "#dp-qa-alerts"
+        slackUsername = "Jenkins"
+        slackIcon = ":jenkins:"
+        greenColor = "#36a64f"
+        redColor = "#FF0000"
     }
 
     stages {
         stage('Initialization') {
             steps {
                 script {
-                    // Request to obtain version, consider to remove hardcoded creds
                     def service2Response = sh(
                         script: """
                         curl -s "${params.envBaseurl}/api/1/rest/public/snaplex/DpPerf?plex_path=/DpPerf/shared/CloudSnaplexMedium" \
@@ -44,19 +43,14 @@ pipeline {
             steps {
                 script {
                     // Build Slack Notification Message
-                    def slackChannel = "#dp-qa-alerts"
-                    def slackUsername = "Jenkins"
-                    def slackIcon = ":jenkins:"
-                    def color = "#36a64f"
-                    def slackWebHook = ''
 
                     def slackMessage = """
                         {
                             "attachments": [
                                 {
-                                    "fallback": "Weekly Data Plane performance tests have started.",
-                                    "color": "${color}",
-                                    "text": "Data Plane weekly performance tests have started - <${env.BUILD_URL}|Jenkins job.>\n • Test Pod: canary\n • Data Plane version: ${Version}"
+                                    "fallback": "Data Plane performance tests have started.",
+                                    "color": "${greenColor}",
+                                    "text": "Data Plane performance tests have started - <${env.BUILD_URL}|Jenkins job.>\n • Test Pod: ${envBaseurl}\n • Data Plane version: ${Version}"
                                 }
                             ],
                             "channel": "${slackChannel}",
@@ -79,7 +73,7 @@ pipeline {
                 script {
                     echo "DP Version: ${Version}"
                     def curlCommand2 = """
-                        curl -X POST "https://canv2-dpperf-dpperfrunner-fm.snaplogicdev.io/api/1/rest/feed/run/task/DpPerf/ScheduledTask/ScheduledTaskPerf/ScheduledTrigger?NumOfTasks=500&Release=${Version}" \
+                        curl -X POST "${params.envBaseurl}/api/1/rest/feed/run/task/DpPerf/ScheduledTask/ScheduledTaskPerf/ScheduledTrigger?NumOfTasks=500&Release=${Version}" \
                              -H "Content-Type: application/json" \
                              -H "Authorization: Bearer dpqa"
                     """
@@ -94,7 +88,7 @@ pipeline {
                 script {
                     // The cURL command to trigger the API
                     def curlCommand0 = """
-                        curl -X GET "https://canary.elastic.snaplogicdev.com/api/1/rest/slsched/feed/DpPerf/UltraTask/shared/DP_UltraPerf_DeleteUltraTasks_Task" \\
+                        curl -X GET "${params.envBaseurl}/api/1/rest/slsched/feed/DpPerf/UltraTask/shared/DP_UltraPerf_DeleteUltraTasks_Task" \\
                              -H "Content-Type: application/json" \\
                              -H "Authorization: Bearer dpqa" \\
                     """
@@ -108,18 +102,15 @@ pipeline {
 
                     // The cURL command to trigger the API
                     def curlCommand1 = """
-                        curl -X GET "https://canary.elastic.snaplogicdev.com/api/1/rest/slsched/feed/DpPerf/UltraTask/shared/DP_UltraPerf_Trigger_Task?release=${params.Version}&env=https://cdn.canary.elastic.snaplogicdev.com" \\
+                        curl -X GET "${params.envBaseurl}/api/1/rest/slsched/feed/DpPerf/UltraTask/shared/DP_UltraPerf_Trigger_Task?release=${params.Version}&env=${params.envBaseurl}" \\
                              -H "Content-Type: application/json" \\
                              -H "Authorization: Bearer dpqa" \\
                     """
 
                     // Debugging: Print the cURL command
-                    echo "Curl Command: ${curlCommand1}"
                     echo "Running Ultra Performance Tests"
+                    echo "Curl Command: ${curlCommand1}"
 
-                    // Execute the cURL command
-                    sh curlCommand1
-                    echo "Results can be viewed at https://lookerstudio.google.com/reporting/e6245e67-81d0-437f-842e-588c1c8a607d/page/HZ0UE"
                     echo "Waiting for 5 minutes to get snaplexes cooled down"
                     sleep 300 // seconds
                 }
@@ -166,13 +157,41 @@ pipeline {
             }
         }
     }
-
     post {
-        always {
-            echo "All downstream stages completed"
+    always {
+        script {
+            // Determine the build status
+            def buildStatus = currentBuild.result ?: 'SUCCESS'
+            def color = (buildStatus == 'UNSTABLE') ? '${redColor}' : '${greenColor}'
+
+            // Log the build status
+            echo "Build status: ${buildStatus}"
+
+            // Build Slack Notification Message
+            def slackMessage = """
+                {
+                    "attachments": [
+                        {
+                            "fallback": "Weekly Data Plane performance tests have ${buildStatus.toLowerCase()} status.",
+                            "color": "${color}",
+                            "text": "Data Plane performance tests have ${buildStatus.toLowerCase()} status - <${env.BUILD_URL}|Jenkins job.>\n • Test Pod: canary\n • Data Plane version: ${Version}\n • https://lookerstudio.google.com/reporting/e6245e67-81d0-437f-842e-588c1c8a607d"
+                        }
+                    ],
+                    "channel": "${slackChannel}",
+                    "username": "${slackUsername}",
+                    "icon_emoji": "${slackIcon}"
+                }
+            """
+
+            // Send Slack Notification via curl
+            sh """
+                curl -X POST -H 'Content-type: application/json' \
+                --data '${slackMessage}' \
+                '${env.W_KEY}'
+            """
         }
-        unstable {
-            echo "Build is unstable due to downstream stage failures"
-        }
+
     }
+}
+
 }
