@@ -172,8 +172,8 @@ pipeline {
                 {
                     "attachments": [
                         {
-                            "fallback": "Weekly Data Plane performance tests have ${buildStatus.toLowerCase()} status.",
-                            "color": "${color}",
+                            "fallback": "Data Plane performance tests have ${buildStatus.toLowerCase()} status.",
+                            "color": "${greenColor}",
                             "text": "Data Plane performance tests have ${buildStatus.toLowerCase()} status - <${env.BUILD_URL}|Jenkins job.>\n • Test Pod: canary\n • Data Plane version: ${Version}\n • https://lookerstudio.google.com/reporting/e6245e67-81d0-437f-842e-588c1c8a607d"
                         }
                     ],
