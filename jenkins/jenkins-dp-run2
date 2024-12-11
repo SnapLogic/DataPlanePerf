@@ -16,28 +16,34 @@ pipeline {
         redColor = "#FF0000"
     }
 
-    stages {
-        stage('Send Slack Notification') {
-            steps {
-                script {
-                    // Send initial Slack notification
-                    def slackResponse = slackSend(
-                        channel: "antons-test",
-                        message: "msg1",
-                        tokenCredentialId: env.W_KEY, // Ensure credentials are used correctly
-                        username: slackUsername,
-                        iconEmoji: slackIcon
-                    )
-
-                    // Validate the response
-                    if (slackResponse?.threadId) {
-                        slackSend(channel: slackResponse.threadId, message: "reply #1")
-                        slackSend(channel: slackResponse.threadId, message: "reply #2")
-                    } else {
-                        error "Slack notification failed: No threadId returned."
-                    }
-                }
-            }
-        }
+    stage('Slack Notification') {
+       steps {
+          script {
+             if (currentBuild.currentResult == 'SUCCESS') {
+                slackSend channel: 'slack_channel',
+                color: '#2EB67D',
+                teamDomain: 'domain_name',
+                message: "*Build*: <${env.BUILD_URL}|${env.BUILD_NUMBER}> | <${env.BUILD_URL}console|Console Output> \n*Status*: ${currentBuild.currentResult} \n*Name*: ${env.JOB_NAME} \n*Project File*: ${PROJECT_FILE} \n*Branch Name*: ${BRANCH_NAME} \n*Environment*: ${TEST_ENVIRONMENT}"
+             }
+             else if (currentBuild.currentResult == 'FAILURE') {
+                slackSend channel: 'slack_channel',
+                color: '#7A1C1D',
+                teamDomain: 'domain_name',
+                message: "*Build*: <${env.BUILD_URL}|${env.BUILD_NUMBER}> | <${env.BUILD_URL}console|Console Output> \n*Status*: ${currentBuild.currentResult} \n*Name*: ${env.JOB_NAME} \n*Project File*: ${PROJECT_FILE} \n*Branch Name*: ${BRANCH_NAME} \n*Environment*: ${TEST_ENVIRONMENT}"
+             }
+             else if (currentBuild.currentResult == 'UNSTABLE') {
+                slackSend channel: 'slack_channel',
+                color: '#EBDA26',
+                teamDomain: 'domain_name',
+                message: "*Build*: <${env.BUILD_URL}|${env.BUILD_NUMBER}> | <${env.BUILD_URL}console|Console Output> \n*Status*: ${currentBuild.currentResult} \n*Name*: ${env.JOB_NAME} \n*Project File*: ${PROJECT_FILE} \n*Branch Name*: ${BRANCH_NAME} \n*Environment*: ${TEST_ENVIRONMENT}"
+             }
+             else {
+                slackSend channel: 'slack_channel',
+                color: '#85898F',
+                teamDomain: 'domain_name',
+                message: "*Build*: <${env.BUILD_URL}|${env.BUILD_NUMBER}> | <${env.BUILD_URL}console|Console Output> \n*Status*: ${currentBuild.currentResult} \n*Name*: ${env.JOB_NAME} \n*Project File*: ${PROJECT_FILE} \n*Branch Name*: ${BRANCH_NAME} \n*Environment*: ${TEST_ENVIRONMENT}"
+             }
+         }
+      }
     }
 }
