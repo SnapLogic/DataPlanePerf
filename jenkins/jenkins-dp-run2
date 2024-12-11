@@ -20,14 +20,24 @@ pipeline {
         stage('Send Slack Notification') {
             steps {
                 script {
-                    // Build Slack Notification Message
+                    // Send initial Slack notification
+                    def slackResponse = slackSend(
+                        channel: "antons-test",
+                        message: "msg1",
+                        tokenCredentialId: env.W_KEY, // Ensure credentials are used correctly
+                        username: slackUsername,
+                        iconEmoji: slackIcon
+                    )
 
-                    def slackResponse = slackSend(channel: "antons-test", message: "msg1")
-                    slackSend(channel: slackResponse.threadId, message: "reply #1")
-                    slackSend(channel: slackResponse.threadId, message: "reply #2")
+                    // Validate the response
+                    if (slackResponse?.threadId) {
+                        slackSend(channel: slackResponse.threadId, message: "reply #1")
+                        slackSend(channel: slackResponse.threadId, message: "reply #2")
+                    } else {
+                        error "Slack notification failed: No threadId returned."
+                    }
                 }
             }
         }
     }
-
 }
