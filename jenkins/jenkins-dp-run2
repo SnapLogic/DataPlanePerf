@@ -1,0 +1,85 @@
+pipeline {
+    agent any
+    environment {
+        greenColor = "#36a64f"
+        slackChannel = "#antons-test"
+        slackUsername = "Jenkins Bot"
+        slackIcon = ":jenkins:"
+        W_KEY = credentials('slackWebHook')
+        slackToken = "xoxb-your-slack-token"
+    }
+    stages {
+        stage('Send Initial Slack Notification') {
+            steps {
+                script {
+                    // Build Slack Notification Message
+                    def slackMessage = """
+                        {
+                            "attachments": [
+                                {
+                                    "fallback": "Data Plane performance tests have started.",
+                                    "color": "${greenColor}",
+                                    "text": "Data Plane performance tests have started - <${env.BUILD_URL}|Jenkins job.>\n • Test Pod: ${envBaseurl}\n • Data Plane version: ${Version}"
+                                }
+                            ],
+                            "channel": "${slackChannel}",
+                            "username": "${slackUsername}",
+                            "icon_emoji": "${slackIcon}"
+                        }
+                    """
+
+                    // Send Slack Notification and capture response
+                    def slackResponse = sh(
+                        script: """
+                            curl -X POST -H 'Authorization: Bearer ${slackToken}' \
+                                 -H 'Content-type: application/json' \
+                                 --data '${slackMessage}' \
+                                 '${W_KEY}'
+                        """,
+                        returnStdout: true
+                    )
+
+                    // Parse the response to extract message timestamp
+                    def jsonResponse = new groovy.json.JsonSlurper().parseText(slackResponse)
+                    if (!jsonResponse.ok) {
+                        error "Failed to send Slack message: ${jsonResponse.error}"
+                    }
+                    env.SLACK_MESSAGE_TS = jsonResponse.ts
+                }
+            }
+        }
+        stage('Execute Task') {
+            steps {
+                echo "Executing tasks..."
+            }
+        }
+        stage('Update Slack Notification') {
+            steps {
+                script {
+                    // Build updated Slack message
+                    def updatedMessage = """
+                        {
+                            "channel": "${slackChannel}",
+                            "ts": "${env.SLACK_MESSAGE_TS}",
+                            "attachments": [
+                                {
+                                    "fallback": "Data Plane performance tests completed.",
+                                    "color": "${greenColor}",
+                                    "text": "Data Plane performance tests completed! - <${env.BUILD_URL}|Jenkins job.>\n • Execution URL: <https://your.execution.url>"
+                                }
+                            ]
+                        }
+                    """
+
+                    // Update Slack Notification via curl
+                    sh """
+                        curl -X POST -H 'Authorization: Bearer ${slackToken}' \
+                             -H 'Content-type: application/json' \
+                             --data '${updatedMessage}' \
+                             'https://slack.com/api/chat.update'
+                    """
+                }
+            }
+        }
+    }
+}
