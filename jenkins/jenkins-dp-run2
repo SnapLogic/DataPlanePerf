@@ -1,0 +1,33 @@
+pipeline {
+    agent { label "dpperf" }
+
+    parameters {
+        choice(name: 'envBaseurl', choices: ['https://cdn.canary.elastic.snaplogicdev.com', 'https://stage.elastic.snaplogicdev.com'], description: 'Select environment')
+    }
+
+    environment {
+        W_KEY = credentials('slackWebHook')
+        USER_KEY = credentials('userAdmin')
+        Version = ""
+        slackChannel = "#dp-qa-alerts"
+        slackUsername = "Jenkins"
+        slackIcon = ":jenkins:"
+        greenColor = "#36a64f"
+        redColor = "#FF0000"
+    }
+
+    stages {
+        stage('Send Slack Notification') {
+            steps {
+                script {
+                    // Build Slack Notification Message
+
+                    def slackResponse = slackSend(channel: "antons-test", message: "msg1")
+                    slackSend(channel: slackResponse.threadId, message: "reply #1")
+                    slackSend(channel: slackResponse.threadId, message: "reply #2")
+                }
+            }
+        }
+    }
+
+}
