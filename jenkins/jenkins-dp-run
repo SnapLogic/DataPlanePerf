@@ -11,7 +11,7 @@ pipeline {
         Version = ""
         slackChannel = "#dp-qa-alerts"
         slackUsername = "Jenkins"
-        slackIcon = ":meow-santa:"
+        slackIcon = ":jenkins:"
         greenColor = "#36a64f"
         redColor = "#FF0000"
     }
