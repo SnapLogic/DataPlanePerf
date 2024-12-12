@@ -42,29 +42,11 @@ pipeline {
         stage('Send Slack Notification') {
             steps {
                 script {
-                    // Build Slack Notification Message
-
-                    def slackMessage = """
-                        {
-                            "attachments": [
-                                {
-                                    "fallback": "Data Plane performance tests have started.",
-                                    "color": "${greenColor}",
-                                    "text": "Data Plane performance tests have started - <${env.BUILD_URL}|Jenkins job.>\n • Test Pod: ${envBaseurl}\n • Data Plane version: ${Version}"
-                                }
-                            ],
-                            "channel": "${slackChannel}",
-                            "username": "${slackUsername}",
-                            "icon_emoji": "${slackIcon}"
-                        }
-                    """
-
-                    // Send Slack Notification via curl
-                    sh """
-                        curl -X POST -H 'Content-type: application/json' \
-                        --data '${slackMessage}' \
-                        '${env.W_KEY}'
-                    """
+                    def slackResponse = slackSend(
+                        channel: "${slackChannel}",
+                        message: "*Data Plane performance tests have started* - <${env.BUILD_URL}|Jenkins job.>\n • *Test Pod*: ${params.envBaseurl}\n • *Data Plane version*: ${Version}",
+                        tokenCredentialId: 'sl-dp-qa'
+                    )
                 }
             }
         }
@@ -158,40 +140,24 @@ pipeline {
         }
     }
     post {
-    always {
-        script {
-            // Determine the build status
-            def buildStatus = currentBuild.result ?: 'SUCCESS'
-            def color = (buildStatus == 'UNSTABLE') ? '${redColor}' : '${greenColor}'
+        always {
+            script {
+                // Determine the build status
+                def buildStatus = currentBuild.result ?: 'SUCCESS'
+                def color = (buildStatus == 'UNSTABLE') ? '${redColor}' : '${greenColor}'
 
-            // Log the build status
-            echo "Build status: ${buildStatus}"
+                // Log the build status
+                echo "Build status: ${buildStatus}"
 
-            // Build Slack Notification Message
-            def slackMessage = """
-                {
-                    "attachments": [
-                        {
-                            "fallback": "Data Plane performance tests have ${buildStatus.toLowerCase()} status.",
-                            "color": "${greenColor}",
-                            "text": "Data Plane performance tests have ${buildStatus.toLowerCase()} status - <${env.BUILD_URL}|Jenkins job.>\n • Test Pod: canary\n • Data Plane version: ${Version}\n • https://lookerstudio.google.com/reporting/e6245e67-81d0-437f-842e-588c1c8a607d"
-                        }
-                    ],
-                    "channel": "${slackChannel}",
-                    "username": "${slackUsername}",
-                    "icon_emoji": "${slackIcon}"
-                }
-            """
+                def statusEmoji = buildStatus == 'SUCCESS' ? ':white_check_mark:' :
+                                 buildStatus == 'ABORTED' ? ':x:' :
+                                 ':warning:' // For failed status
 
-            // Send Slack Notification via curl
-            sh """
-                curl -X POST -H 'Content-type: application/json' \
-                --data '${slackMessage}' \
-                '${env.W_KEY}'
-            """
+                def slackMessage = """
+                    *Data Plane performance tests have ${buildStatus.toLowerCase()}* ${statusEmoji} - <${env.BUILD_URL}|Jenkins job.>\n • *Test Pod*: canary\n • *Data Plane version*: ${Version}\n • https://lookerstudio.google.com/reporting/e6245e67-81d0-437f-842e-588c1c8a607d
+                """
+                slackSend(channel: "${slackChannel}", message: slackMessage, tokenCredentialId: 'sl-dp-qa')
+            }
         }
-
     }
-}
-
 }
