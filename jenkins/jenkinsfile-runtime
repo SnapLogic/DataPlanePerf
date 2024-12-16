@@ -1,3 +1,4 @@
+#!groovy
 pipeline {
     agent { label "dpperf" }
     stages {
@@ -19,7 +20,7 @@ pipeline {
                                 job: 'platform-jar/DataPlane/dp-performance/jmeter-runner',
                                 wait: true,
                                 parameters: [
-                                    string(name: 'envBaseurl', value: 'canv2-dpperf-groundsnaplexmedium-fm.snaplogicdev.io'),
+                                    string(name: 'envBaseurl', value: 'stagev2-dpperf-groundsnaplexmedium-fm.snaplogicdev.io'),
                                     string(name: 'Version', value: '4.39.1'),
                                     string(name: 'TestPlan', value: 'RTTChildToGrandChild.jmx'),
                                     string(name: 'Threads', value: currentValue.toString())

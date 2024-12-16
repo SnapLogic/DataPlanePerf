@@ -1,3 +1,4 @@
+#!groovy
 pipeline {
   agent none // No global agent is defined; will be defined per stage
   options {
@@ -9,7 +10,9 @@ pipeline {
       name: 'envBaseurl',
       choices: [
         'canv2-dpperf-cloudsnaplexmedium-fm.snaplogicdev.io',
-        'canv2-dpperf-groundsnaplexmedium-fm.snaplogicdev.io'
+        'canv2-dpperf-groundsnaplexmedium-fm.snaplogicdev.io',
+        'stagev2-dpperf-cloudsnaplexmedium-fm.snaplogicdev.io',
+        'stagev2-dpperf-groundsnaplexmedium-fm.snaplogicdev.io'
       ],
       description: 'Select FM size'
     )
