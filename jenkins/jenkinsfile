@@ -12,7 +12,8 @@ pipeline {
         'canv2-dpperf-cloudsnaplexmedium-fm.snaplogicdev.io',
         'canv2-dpperf-groundsnaplexmedium-fm.snaplogicdev.io',
         'stagev2-dpperf-cloudsnaplexmedium-fm.snaplogicdev.io',
-        'stagev2-dpperf-groundsnaplexmedium-fm.snaplogicdev.io'
+        'stagev2-dpperf-groundsnaplexmedium-fm.snaplogicdev.io',
+        '172.27.186.28'
       ],
       description: 'Select FM size'
     )
